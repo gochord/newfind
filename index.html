@@ -910,52 +910,76 @@
       margin: 0 14px;
     }
   
-    @media (max-width: 768px) {
-      html, body {
-        overflow: hidden;
-      }
+    
+@media (max-width: 768px) {
+  html, body {
+    overflow: hidden;
+  }
 
-      .layout {
-        display: block;
-        position: relative;
-        height: calc(100vh - 54px);
-      }
+  .layout {
+    position: relative;
+    display: block;
+    height: calc(100vh - 54px);
+    overflow: hidden;
+  }
 
-      .sidebar {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 20;
-        background: var(--bg);
-        transition: transform .42s cubic-bezier(.4,0,.2,1);
-      }
+  #map {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
 
-      .sidebar.search-complete {
-        transform: translateY(-72%);
-        box-shadow: 0 8px 28px rgba(0,0,0,.18);
-      }
+  .sidebar {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    background: var(--bg);
+    transition: transform .45s cubic-bezier(.4,0,.2,1);
+  }
 
-      #map {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-      }
+  .sidebar.search-complete {
+    transform: translateY(calc(-100% + 78px));
+  }
 
-      .scroll-area {
-        padding-bottom: 20px;
-      }
+  .search-panel {
+    flex-shrink: 0;
+    background: #fff;
+    border-bottom: 1px solid var(--border-soft);
+    padding-top: 18px;
+  }
 
-      .search-panel {
-        padding-top: 18px;
-      }
+  .scroll-area {
+    overflow-y: auto;
+    background: var(--bg);
+  }
 
-      .view-nav {
-        background: rgba(255,255,255,.95);
-        backdrop-filter: blur(10px);
-      }
-    }
+  .view-nav {
+    background: rgba(255,255,255,.96);
+    backdrop-filter: blur(10px);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 4px;
+  }
+
+  .chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chip {
+    flex: 0 0 auto;
+    padding: 4px 9px;
+    font-size: .66rem;
+  }
+}
+
 
 
     .chips {
