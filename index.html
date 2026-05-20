@@ -940,6 +940,178 @@
       background: var(--border-soft);
       margin: 0 14px;
     }
+
+    /* 모바일 전용 요소는 데스크탑에서 숨김 */
+    .mobile-home-scroll,
+    .mobile-result-sheet { display: none; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       모바일 레이아웃
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    @media (max-width: 700px) {
+      html, body { height: 100%; overflow: hidden; }
+
+      /* 헤더 */
+      header { height: 50px; padding: 0 14px; }
+      .h-logo-main { font-size: 1.2rem; }
+
+      /* 레이아웃: 모바일은 세로 스택 */
+      .layout {
+        display: flex;
+        flex-direction: column;
+        grid-template-columns: none;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* ── 사이드바(패널) ── */
+      .sidebar {
+        border-right: none;
+        border-bottom: 1.5px solid var(--t1);
+        /* 기본: 홈 화면 풀스크린 */
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 10;
+        background: var(--bg);
+        transition: transform 0.38s cubic-bezier(.4,0,.2,1);
+        transform: translateY(0);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* 검색 후: 사이드바를 위로 슬라이드해서 검색창+지역칩 높이만 남김 */
+      .sidebar.results-open {
+        /* search-panel 높이만큼만 보이도록 슬라이드 업 */
+        transform: translateY(calc(-100% + var(--panel-h, 120px)));
+        bottom: auto;
+        height: 100%;
+      }
+      /* 결과 열렸을 때 모바일 홈 스크롤 숨김 */
+      .sidebar.results-open .mobile-home-scroll {
+        display: none;
+      }
+
+      /* 지도 */
+      #map {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 1;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+      #map.visible {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      /* 지도 위 결과 패널 (하단 시트) */
+      .mobile-result-sheet {
+        display: none;
+        position: absolute;
+        left: 0; right: 0; bottom: 0;
+        z-index: 15;
+        background: var(--bg);
+        border-top: 1.5px solid var(--t1);
+        height: 45vh;
+        overflow: hidden;
+        flex-direction: column;
+        box-shadow: 0 -4px 24px rgba(0,0,0,.13);
+        transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+      }
+      .mobile-result-sheet.active {
+        display: flex;
+      }
+
+      /* 시트 핸들 */
+      .sheet-handle-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 14px 4px;
+        flex-shrink: 0;
+        border-bottom: 1px solid var(--border-soft);
+        gap: 8px;
+        cursor: pointer;
+      }
+      .sheet-handle {
+        width: 36px; height: 4px;
+        background: var(--border-strong);
+        border-radius: 2px;
+      }
+      .sheet-handle-title {
+        font-size: .75rem;
+        font-weight: 700;
+        color: var(--t2);
+        flex: 1;
+        text-align: left;
+        letter-spacing: -.01em;
+      }
+      .sheet-close-btn {
+        width: 26px; height: 26px;
+        border: 1px solid var(--border-strong);
+        background: none;
+        border-radius: 0;
+        font-size: .7rem;
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        color: var(--t2);
+        transition: all .14s;
+      }
+      .sheet-close-btn:hover { border-color: var(--t1); color: var(--t1); }
+
+      .sheet-scroll {
+        flex: 1;
+        overflow-y: auto;
+        padding: 6px 10px 10px;
+      }
+      .sheet-scroll::-webkit-scrollbar { width: 3px; }
+      .sheet-scroll::-webkit-scrollbar-thumb { background: var(--border); }
+
+      /* 모바일에서 상태바, 뷰내비 숨김 (시트에 통합) */
+      .mobile-result-sheet .status-bar {
+        display: flex;
+        margin: 0;
+        border-bottom: 1px solid var(--border-soft);
+        border-top: none;
+        font-size: .69rem;
+        padding: 5px 14px;
+        flex-shrink: 0;
+      }
+
+      /* 사이드바 안의 상태바·뷰내비는 모바일에서 숨김 */
+      .sidebar .status-bar,
+      .sidebar .view-nav,
+      .sidebar .scroll-area { display: none; }
+
+      /* 검색 패널은 항상 표시 */
+      .sidebar .search-panel { display: flex; flex-direction: column; flex-shrink: 0; }
+
+      /* 모바일 홈 스크롤 표시 */
+      .mobile-home-scroll { display: flex; }
+
+      /* 홈 뷰를 사이드바 스크롤 영역에 올리기 */
+      .mobile-home-scroll {
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+      }
+      .mobile-home-scroll::-webkit-scrollbar { width: 3px; }
+      .mobile-home-scroll::-webkit-scrollbar-thumb { background: var(--border); }
+
+      /* 폴더 그리드 모바일 */
+      .folder-grid { grid-template-columns: repeat(3, 1fr); }
+
+      /* 모달 모바일 */
+      #curateModal .modal-box { width: 96vw; }
+      #savePickerModal .modal-box,
+      #createFolderModal .modal-box { width: 92vw; padding: 16px; }
+
+      /* 아이콘 그리드 모바일 */
+      .icon-grid { grid-template-columns: repeat(7, 1fr); }
+    }
   </style>
 </head>
 <body>
@@ -957,7 +1129,7 @@
     <aside class="sidebar">
 
       <!-- 검색 패널 -->
-      <div class="search-panel">
+      <div class="search-panel" id="searchPanel">
         <div class="search-row">
           <div class="s-wrap">
             <span class="s-ico">⌕</span>
@@ -981,7 +1153,7 @@
       <!-- 상태 바 -->
       <div class="status-bar" id="statusBar">큐레이션을 눌러보거나 검색해보세요.</div>
 
-      <!-- 스크롤 영역 -->
+      <!-- 스크롤 영역 (데스크탑) -->
       <div class="scroll-area">
 
         <!-- ── 홈 뷰 ── -->
@@ -1027,10 +1199,55 @@
         <div id="viewFolder"></div>
 
       </div>
+
+      <!-- 모바일 전용: 홈 콘텐츠 스크롤 영역 -->
+      <div class="mobile-home-scroll" id="mobileHomeScroll">
+        <!-- 큐레이션 캐러셀 (모바일용 복제) -->
+        <div class="home-sec">
+          <div class="sec-header">
+            <div>
+              <div class="sec-title">이런 장소는 어때요?</div>
+              <div class="sec-sub">카드를 눌러 자세히 보기</div>
+            </div>
+          </div>
+          <div class="slider-outer" id="sliderOuterM">
+            <div class="slider-track" id="sliderTrackM"></div>
+          </div>
+          <div class="slider-ctrl">
+            <div class="arrows">
+              <button class="arr-btn" id="btnPrevM">◀</button>
+              <button class="arr-btn" id="btnNextM">▶</button>
+            </div>
+            <div class="prog-wrap"><div class="prog-bar" id="progBarM"></div></div>
+            <div class="dots" id="dotWrapM"></div>
+          </div>
+        </div>
+
+        <div class="section-rule"></div>
+
+        <!-- 저장 목록 섹션 -->
+        <div class="home-sec" style="padding-top:12px">
+          <div class="sec-header">
+            <div class="sec-title">내 저장 목록</div>
+          </div>
+          <div class="folder-grid" id="folderGridM"></div>
+        </div>
+      </div>
     </aside>
 
     <div id="map"></div>
-  </div>
+
+    <!-- 모바일 하단 결과 시트 -->
+    <div class="mobile-result-sheet" id="mobileResultSheet">
+      <div class="sheet-handle-bar" id="sheetHandleBar">
+        <div class="sheet-handle"></div>
+        <span class="sheet-handle-title" id="sheetTitle">검색 결과</span>
+        <button class="sheet-close-btn" id="sheetCloseBtn">✕</button>
+      </div>
+      <div class="status-bar" id="statusBarSheet"></div>
+      <div class="sheet-scroll" id="sheetScroll"></div>
+    </div>
+  </div><!-- /.layout -->
 
   <!-- ── 큐레이션 모달 ── -->
   <div class="modal-backdrop" id="curateModal">
@@ -1865,6 +2082,294 @@
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
   renderFolderGrid();
   showView('home');
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     16. 모바일 전용 로직
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  const isMobile = () => window.innerWidth <= 700;
+
+  /* ── 모바일 캐러셀 (복제본) ── */
+  const trackM   = document.getElementById('sliderTrackM');
+  const dotWrapM = document.getElementById('dotWrapM');
+  const progBarM = document.getElementById('progBarM');
+  let curIdxM    = 0;
+  let autoTimerM = null;
+
+  CURATION.forEach((c, i) => {
+    const card = document.createElement('div');
+    card.className = 'curate-card';
+    const bg  = document.createElement('div'); bg.className = 'card-bg'; bg.style.background = c.gradient;
+    const ov  = document.createElement('div'); ov.className = 'card-ov';
+    const cnt = document.createElement('div'); cnt.className = 'card-cnt';
+    cnt.innerHTML = `
+      <span class="card-tag">${c.tag}</span>
+      <div class="card-pname">${c.name}</div>
+      <div class="card-region">📍 ${c.region}</div>
+      <div class="card-desc-p">${c.desc}</div>`;
+    card.appendChild(bg); card.appendChild(ov); card.appendChild(cnt);
+    card.addEventListener('click', () => openCurateModal(i));
+    card.addEventListener('mousedown', e => e.preventDefault());
+    trackM.appendChild(card);
+
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => { slideToM(i); startAutoM(); });
+    dotWrapM.appendChild(dot);
+  });
+
+  function slideToM(n) {
+    curIdxM = (n + CURATION.length) % CURATION.length;
+    trackM.style.transform = `translateX(-${curIdxM * 100}%)`;
+    dotWrapM.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('active', i===curIdxM));
+    restartProgM();
+  }
+  function restartProgM() {
+    progBarM.style.transition = 'none'; progBarM.style.width = '0%';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      progBarM.style.transition = `width ${AUTO_SEC}s linear`; progBarM.style.width = '100%';
+    }));
+  }
+  function startAutoM() {
+    clearInterval(autoTimerM);
+    autoTimerM = setInterval(() => slideToM(curIdxM + 1), AUTO_SEC * 1000);
+    restartProgM();
+  }
+
+  document.getElementById('btnPrevM').addEventListener('click', () => { slideToM(curIdxM-1); startAutoM(); });
+  document.getElementById('btnNextM').addEventListener('click', () => { slideToM(curIdxM+1); startAutoM(); });
+
+  let dragXM = 0, draggingM = false;
+  const sOuterM = document.getElementById('sliderOuterM');
+  sOuterM.addEventListener('mousedown', e => { draggingM = true; dragXM = e.clientX; });
+  window.addEventListener('mouseup', e => {
+    if (!draggingM) return; draggingM = false;
+    const d = dragXM - e.clientX;
+    if (Math.abs(d) > 35) { slideToM(d > 0 ? curIdxM+1 : curIdxM-1); startAutoM(); }
+  });
+  let tXM = 0;
+  sOuterM.addEventListener('touchstart', e => { tXM = e.touches[0].clientX; }, { passive:true });
+  sOuterM.addEventListener('touchend', e => {
+    const d = tXM - e.changedTouches[0].clientX;
+    if (Math.abs(d) > 35) { slideToM(d > 0 ? curIdxM+1 : curIdxM-1); startAutoM(); }
+  });
+  if (isMobile()) startAutoM();
+
+  /* ── 모바일 폴더 그리드 ── */
+  function renderFolderGridM() {
+    const grid = document.getElementById('folderGridM');
+    if (!grid) return;
+    const folders = loadFolders();
+    const saved   = loadSaved();
+    grid.innerHTML = '';
+    if (!folders.length) {
+      const empty = document.createElement('div');
+      empty.className = 'folder-empty';
+      empty.innerHTML = `<div class="fe-ico">📂</div><p>아직 폴더가 없어요.<br/>장소를 저장해 나만의 목록을 만들어보세요.</p>`;
+      grid.appendChild(empty);
+    } else {
+      folders.forEach(f => {
+        const cnt = saved.filter(s => s.folderId === f.id).length;
+        const card = document.createElement('div');
+        card.className = 'folder-card';
+        card.style.background = f.color;
+        card.innerHTML = `
+          <div class="folder-del" data-fid="${f.id}">✕</div>
+          <div class="folder-ico">${f.icon}</div>
+          <div class="folder-name">${f.name}</div>
+          <div class="folder-count">${cnt}곳</div>`;
+        card.querySelector('.folder-del').addEventListener('click', e => {
+          e.stopPropagation();
+          if (!confirm(`'${f.name}' 폴더를 삭제할까요?`)) return;
+          let fl = loadFolders().filter(x => x.id !== f.id);
+          saveFolders(fl);
+          let sl = loadSaved().filter(x => x.folderId !== f.id);
+          saveSaved(sl);
+          renderFolderGrid(); renderFolderGridM();
+        });
+        card.addEventListener('click', () => {
+          currentFolderId = f.id;
+          showFolderView(f);
+        });
+        grid.appendChild(card);
+      });
+    }
+    const addCard = document.createElement('div');
+    addCard.className = 'add-folder-card';
+    addCard.innerHTML = `<div class="add-ico">＋</div><div class="add-lbl">새 폴더</div>`;
+    addCard.addEventListener('click', () => openCreateFolder(false));
+    grid.appendChild(addCard);
+  }
+
+  /* ── 모바일 결과 시트 열기/닫기 ── */
+  function openMobileResultSheet(title) {
+    const sheet = document.getElementById('mobileResultSheet');
+    document.getElementById('sheetTitle').textContent = title || '검색 결과';
+    document.getElementById('sheetScroll').innerHTML = '';
+    document.getElementById('statusBarSheet').textContent = '';
+    sheet.classList.add('active');
+    document.getElementById('map').classList.add('visible');
+    document.getElementById('sidebar') && null;
+    document.querySelector('.sidebar').classList.add('results-open');
+    // 패널 높이 CSS 변수 업데이트
+    const panelH = document.getElementById('searchPanel').offsetHeight;
+    document.querySelector('.sidebar').style.setProperty('--panel-h', panelH + 'px');
+  }
+
+  function closeMobileResultSheet() {
+    document.getElementById('mobileResultSheet').classList.remove('active');
+    document.getElementById('map').classList.remove('visible');
+    document.querySelector('.sidebar').classList.remove('results-open');
+  }
+
+  document.getElementById('sheetCloseBtn').addEventListener('click', () => {
+    closeMobileResultSheet();
+    clearMarkers(); closeInfo();
+    renderFolderGridM();
+  });
+
+  document.getElementById('sheetHandleBar').addEventListener('click', () => {
+    // 핸들 탭하면 시트 높이 토글
+    const sheet = document.getElementById('mobileResultSheet');
+    sheet.style.height = sheet.style.height === '85vh' ? '45vh' : '85vh';
+  });
+
+  /* ── 모바일: showView 후처리 ── */
+  const _origShowView = showView;
+  // 모바일 전용 결과 렌더링 후처리는 runSearch 패치로 처리
+
+  /* ── 모바일: runSearch 래핑 ── */
+  const _origHandleResult = handleResult;
+
+  // 검색 결과를 모바일 시트에도 미러링
+  function mirrorResultsToSheet(data, status) {
+    if (!isMobile()) return;
+    const sheet  = document.getElementById('mobileResultSheet');
+    const scroll = document.getElementById('sheetScroll');
+    const statEl = document.getElementById('statusBarSheet');
+
+    if (status !== kakao.maps.services.Status.OK) {
+      statEl.textContent = '결과를 찾지 못했어요.';
+      statEl.className = 'status-bar error';
+      scroll.innerHTML = `<div class="folder-view-empty"><div class="e-ico">😕</div><p>검색 결과가 없어요.<br/>다른 키워드를 입력해보세요.</p></div>`;
+      return;
+    }
+
+    statEl.textContent = `${data.length}곳을 찾았어요 ✓`;
+    statEl.className = 'status-bar success';
+
+    data.forEach((place, idx) => {
+      const pos   = new kakao.maps.LatLng(place.y, place.x);
+      const emoji = getEmoji(place.category_name);
+      const addr  = place.road_address_name || place.address_name || '주소 없음';
+      const cat   = place.category_name ? place.category_name.split(' > ').pop() : '분류 없음';
+      const saved = isPlaceSaved(place.id);
+
+      const card = document.createElement('div');
+      card.className = 'result-card'; card.dataset.midx = idx;
+      card.style.animationDelay = `${idx * 0.04}s`;
+      card.innerHTML = `
+        <span class="card-num">#${idx+1}</span>
+        <button class="save-btn ${saved?'saved':''}" data-pidx="${idx}" title="${saved?'저장됨':'저장하기'}">🔖</button>
+        <div class="card-name">${emoji} ${place.place_name}</div>
+        <div class="card-rows">
+          <div class="card-row"><span class="ri">📌</span><span>${addr}</span></div>
+          <div class="card-row"><span class="ri">📞</span><span>${place.phone||'전화번호 없음'}</span></div>
+          <div class="card-row"><span class="ri">🏷️</span><span>${cat}</span></div>
+        </div>`;
+      card.addEventListener('click', e => {
+        if (e.target.closest('.save-btn')) return;
+        map.panTo(pos); showInfo(place, pos);
+        scroll.querySelectorAll('.result-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+      });
+      card.querySelector('.save-btn').addEventListener('click', e => {
+        e.stopPropagation(); openSavePicker(place);
+      });
+      scroll.appendChild(card);
+    });
+  }
+
+  /* ── 원래 runSearch 래핑 ── */
+  // handleResult 원본에 모바일 미러 연결
+  const __origHandleResult = handleResult;
+
+  // handleResult를 재정의해서 모바일 시트에도 반영
+  // (전역 스코프에 있으므로 shadow 처리)
+  const _patchedHandleResult = function(data, status) {
+    __origHandleResult(data, status);
+    if (isMobile()) {
+      const kw = document.getElementById('searchInput').value.trim();
+      openMobileResultSheet(`"${kw}" 검색 결과`);
+      mirrorResultsToSheet(data, status);
+    }
+  };
+
+  // ps.keywordSearch 콜백을 패치하기 위해 runSearch를 오버라이드
+  function runSearch(keyword, forceLoc) {
+    const kw = keyword || document.getElementById('searchInput').value.trim();
+    if (!kw) {
+      setStatus('검색어를 입력해주세요.', 'error');
+      document.getElementById('searchInput').focus();
+      return;
+    }
+
+    clearMarkers(); closeInfo();
+    document.getElementById('viewSearch').innerHTML = '';
+    showView('search', `"${kw}" 검색 결과`);
+    setStatus('검색 중…', 'loading');
+
+    const opts = { sort: kakao.maps.services.SortBy.DISTANCE };
+
+    const executeSearch = () => ps.keywordSearch(kw, _patchedHandleResult, opts);
+
+    if (forceLoc) {
+      opts.location = forceLoc;
+      executeSearch();
+    } else {
+      const r = REGIONS[activeChipIdx];
+      if (r?.nearby && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          opts.location = new kakao.maps.LatLng(pos.coords.latitude, pos.coords.longitude);
+          executeSearch();
+        }, () => { setStatus('위치 정보를 가져올 수 없어요.', 'error'); });
+      } else if (activeChipIdx > 0) {
+        opts.location = new kakao.maps.LatLng(r.lat, r.lng);
+        executeSearch();
+      } else {
+        executeSearch();
+      }
+    }
+  }
+
+  /* ── 모바일 goHome ── */
+  const _origGoHome = goHome;
+  function goHome() {
+    clearMarkers(); closeInfo();
+    currentFolderId = null;
+    renderFolderGrid();
+    renderFolderGridM();
+    showView('home');
+    if (isMobile()) {
+      closeMobileResultSheet();
+      document.getElementById('searchInput').value = '';
+    }
+  }
+
+  document.getElementById('homeBtn').removeEventListener && null;
+  /* homeBtn / backBtn 은 기존 addEventListener('click', goHome) 이 이미 걸려 있으므로
+     goHome 함수를 재정의하면 자동으로 새 버전이 호출됨 */
+  // searchBtn / searchInput keydown: 중복 등록이지만 동일 로직이므로 무시
+  
+
+  /* ── 모바일 초기화 ── */
+  function initMobile() {
+    if (!isMobile()) return;
+    renderFolderGridM();
+    // 지도는 결과 전까지 숨김
+    document.getElementById('map').classList.remove('visible');
+  }
+  initMobile();
+  window.addEventListener('resize', initMobile);
   </script>
 </body>
 </html>
