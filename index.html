@@ -654,6 +654,32 @@
     }
     .info-addr { font-size: .71rem; color: var(--t2); line-height: 1.55; }
     .info-phone { font-size: .69rem; color: var(--accent-mid); margin-top: 3px; font-weight: 500; }
+
+    /* 카카오맵 링크 버튼 */
+    .info-kakao-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 9px;
+      padding: 7px 10px;
+      background: #FEE500;          /* 카카오 브랜드 옐로우 */
+      border: none;
+      border-radius: 0;
+      font-size: .72rem;
+      font-weight: 700;
+      color: #3C1E1E;               /* 카카오 브랜드 브라운 */
+      font-family: 'Pretendard Variable', sans-serif;
+      cursor: pointer;
+      text-decoration: none;
+      letter-spacing: .01em;
+      transition: background .14s, transform .1s;
+      width: 100%;
+    }
+    .info-kakao-btn:hover  { background: #F0D800; }
+    .info-kakao-btn:active { transform: scale(.97); }
+    .info-kakao-btn .k-ico { font-size: .85rem; flex-shrink: 0; }
+
     .info-tail {
       width: 0; height: 0;
       border-left: 7px solid transparent;
@@ -1244,23 +1270,49 @@
   function closeInfo() {
     if (openInfoOverlay) { openInfoOverlay.setMap(null); openInfoOverlay = null; }
   }
-  function showInfo(place, pos) {
+  // placeId: 카카오 장소 ID (place.id 또는 저장된 kakao_id)
+  function showInfo(place, pos, placeId) {
     closeInfo();
     const wrap = document.createElement('div');
     const bub  = document.createElement('div'); bub.className = 'info-bubble';
-    const xb   = document.createElement('div'); xb.className = 'info-x'; xb.textContent = '✕';
+
+    // 닫기 버튼
+    const xb = document.createElement('div'); xb.className = 'info-x'; xb.textContent = '✕';
     xb.addEventListener('click', e => { e.stopPropagation(); closeInfo(); });
+
+    // 상호명
     const nm = document.createElement('div'); nm.className = 'info-name'; nm.textContent = place.place_name;
+
+    // 주소
     const ad = document.createElement('div'); ad.className = 'info-addr';
     ad.textContent = place.road_address_name || place.address_name || '주소 정보 없음';
+
     bub.appendChild(xb); bub.appendChild(nm); bub.appendChild(ad);
+
+    // 전화번호 (있을 때만)
     if (place.phone) {
       const ph = document.createElement('div'); ph.className = 'info-phone'; ph.textContent = '📞 ' + place.phone;
       bub.appendChild(ph);
     }
+
+    // 카카오맵 링크 버튼
+    // place.id(검색 결과) 또는 전달받은 placeId(저장 장소) 사용
+    const kakaoId = placeId || place.id;
+    if (kakaoId) {
+      const kakaoBtn = document.createElement('a');
+      kakaoBtn.className = 'info-kakao-btn';
+      kakaoBtn.href      = `https://place.map.kakao.com/${kakaoId}`;
+      kakaoBtn.target    = '_blank';          // 새 탭으로 열기
+      kakaoBtn.rel       = 'noopener noreferrer';
+      kakaoBtn.innerHTML = `<span class="k-ico">🗺️</span> 카카오맵에서 보기`;
+      // 버튼 클릭이 지도 이벤트로 전파되지 않도록 방지
+      kakaoBtn.addEventListener('click', e => e.stopPropagation());
+      bub.appendChild(kakaoBtn);
+    }
+
     const tail = document.createElement('div'); tail.className = 'info-tail';
     wrap.appendChild(bub); wrap.appendChild(tail);
-    openInfoOverlay = new kakao.maps.CustomOverlay({ position:pos, content:wrap, yAnchor:1.48, zIndex:20 });
+    openInfoOverlay = new kakao.maps.CustomOverlay({ position:pos, content:wrap, yAnchor:1.52, zIndex:20 });
     openInfoOverlay.setMap(map);
   }
 
@@ -1458,7 +1510,8 @@
       mEl.addEventListener('click', e => {
         e.stopPropagation();
         map.panTo(pos);
-        showInfo({ place_name:sp.place_name, road_address_name:sp.road_address_name, address_name:sp.address_name, phone:sp.phone }, pos);
+        // 저장된 카카오 장소 ID(kakao_id)를 세 번째 인자로 전달
+        showInfo({ place_name:sp.place_name, road_address_name:sp.road_address_name, address_name:sp.address_name, phone:sp.phone }, pos, sp.kakao_id);
       });
       const mOv = new kakao.maps.CustomOverlay({ position:pos, content:mEl, yAnchor:1.1, zIndex:5 });
       mOv.setMap(map); markerOverlays.push(mOv);
@@ -1485,7 +1538,8 @@
       card.addEventListener('click', e => {
         if (e.target.closest('.sp-del')) return;
         map.panTo(pos);
-        showInfo({ place_name:sp.place_name, road_address_name:sp.road_address_name, address_name:sp.address_name, phone:sp.phone }, pos);
+        // 저장된 카카오 장소 ID(kakao_id)를 세 번째 인자로 전달
+        showInfo({ place_name:sp.place_name, road_address_name:sp.road_address_name, address_name:sp.address_name, phone:sp.phone }, pos, sp.kakao_id);
       });
       sec.appendChild(card);
     });
