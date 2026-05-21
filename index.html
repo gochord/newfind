@@ -949,6 +949,8 @@
        모바일 레이아웃
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     @media (max-width: 700px) {
+      /* ── 자동 줌 완전 방지: 모든 input 16px 이상 ── */
+      input, textarea, select { font-size: 16px !important; }
       /* 사파리 키보드 올라올 때 리사이즈 방지: svh 사용 */
       html {
         height: 100%;
@@ -1003,23 +1005,27 @@
         border-right: none;
         border-bottom: none;
         position: absolute;
-        inset: 0;
+        top: 0; left: 0; right: 0;
+        height: 100%;   /* inset:0 대신 height 명시 (transition용) */
         z-index: 10;
         background: var(--bg);
         display: flex;
         flex-direction: column;
         overflow: hidden;
-        /* 홈→결과 슬라이드 트랜지션 */
-        transition: transform 0.4s cubic-bezier(.4,0,.2,1);
-        will-change: transform;
+        /* 홈→결과 트랜지션 */
+        transition: height 0.4s cubic-bezier(.4,0,.2,1), transform 0.4s cubic-bezier(.4,0,.2,1);
+        will-change: transform, height;
       }
 
-      /* 결과 화면: 사이드바를 위로 밀어 검색패널만 보이게 */
+      /* 결과 화면: 사이드바 높이를 검색패널 높이로 줄임 */
       .sidebar.results-open {
-        transform: translateY(calc(-100% + var(--m-panel-h, 116px)));
+        bottom: auto;
+        height: var(--m-panel-h, 116px);
+        overflow: hidden;
+        transition: height 0.4s cubic-bezier(.4,0,.2,1);
       }
       .sidebar.results-open .mobile-home-scroll {
-        visibility: hidden;   /* 레이아웃 유지하며 숨김 */
+        display: none;
       }
 
       /* 데스크탑 전용 요소 숨김 */
@@ -1045,12 +1051,15 @@
       }
       .mobile-home-scroll::-webkit-scrollbar { display: none; }
 
-      /* ━━ 하단 결과 시트 ━━ */
+      /* ━━ 하단 결과 시트 ━━
+         시트는 레이아웃 전체 기준으로 위치
+         peek: 핸들+상태바+카드 ~2장 높이만 보임 (아래서 올라옴)
+         half: 전체 보임
+      ━━ */
       .mobile-result-sheet {
         position: absolute;
         left: 0; right: 0;
-        /* 검색패널 높이 아래, 화면 아래까지 */
-        top: var(--m-panel-h, 116px);
+        top: var(--m-panel-h, 116px);  /* 검색패널 바로 아래 */
         bottom: 0;
         z-index: 20;
         background: var(--bg);
@@ -1059,14 +1068,15 @@
         flex-direction: column;
         overflow: hidden;
         box-shadow: 0 -4px 24px rgba(0,0,0,.13);
-        /* 기본: 화면 아래로 숨겨둠 */
+        /* 기본: 완전히 아래로 숨김 */
         transform: translateY(100%);
         transition: transform 0.4s cubic-bezier(.4,0,.2,1);
         will-change: transform;
       }
+      /* peek: 핸들바(40px) + 상태바(28px) + 카드2장(약180px) = ~248px 노출
+         시트 전체 높이에서 248px 뺀 만큼 아래에 숨김 */
       .mobile-result-sheet.peek {
-        /* 하단 45% 위치에 보임 */
-        transform: translateY(55%);
+        transform: translateY(calc(100% - var(--sheet-peek-h, 248px)));
       }
       .mobile-result-sheet.half {
         transform: translateY(0);
@@ -2113,11 +2123,15 @@
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
   const isMobile = () => window.innerWidth <= 700;
 
-  /* ── 검색패널 높이를 CSS 변수로 갱신 ── */
+  /* ── 검색패널 높이 + 시트 peek 높이 CSS 변수 갱신 ── */
   function updatePanelHeight() {
-    const h = document.getElementById('searchPanel').offsetHeight;
-    document.querySelector('.sidebar').style.setProperty('--m-panel-h', h + 'px');
-    document.getElementById('mobileResultSheet').style.setProperty('--m-panel-h', h + 'px');
+    const panelH = document.getElementById('searchPanel').offsetHeight;
+    const sidebar = document.querySelector('.sidebar');
+    const sheet   = document.getElementById('mobileResultSheet');
+    sidebar.style.setProperty('--m-panel-h', panelH + 'px');
+    sheet.style.setProperty('--m-panel-h', panelH + 'px');
+    // peek 노출 높이: 핸들바(40) + 상태바(28) + 카드2장(192) = 260px
+    sheet.style.setProperty('--sheet-peek-h', '260px');
   }
 
   /* ━━ 모바일 캐러셀 (홈 스크롤 복제본) ━━ */
@@ -2232,11 +2246,15 @@
     mSheetScroll.innerHTML = '';
     const statEl = document.getElementById('statusBarSheet');
     statEl.textContent = ''; statEl.className = 'status-bar';
-    // 사이드바 슬라이드 업
-    document.querySelector('.sidebar').classList.add('results-open');
+    // 지도 먼저 visible (사이드바 뒤에서 보이기 시작)
     document.getElementById('map').classList.add('visible');
-    // 약간 후 peek으로
-    setTimeout(() => setSheetState('peek'), 50);
+    // 사이드바 높이를 검색패널 높이로 애니메이션 축소
+    document.querySelector('.sidebar').classList.add('results-open');
+    // 트랜지션 완료 후: 지도 리사이즈 + 시트 peek
+    setTimeout(() => {
+      if (typeof map !== 'undefined') kakao.maps.event.trigger(map, 'resize');
+      setSheetState('peek');
+    }, 450);
   }
 
   function closeMobileSheet() {
@@ -2244,7 +2262,8 @@
     setTimeout(() => {
       document.querySelector('.sidebar').classList.remove('results-open');
       document.getElementById('map').classList.remove('visible');
-    }, 400);
+      if (typeof map !== 'undefined') kakao.maps.event.trigger(map, 'resize');
+    }, 420);
   }
 
   /* 스와이프 제스처 */
